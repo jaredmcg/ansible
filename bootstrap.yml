@@ -1,0 +1,36 @@
+---
+
+
+- hosts: all
+  become: true
+  pre_tasks:
+
+  - name: install updates
+    apt: 
+      only_upgrade: yes
+      update_cache: yes
+
+#creates splunkadmin user and adds ssh key and adds splunkadmin to sudoers
+- hosts: splunk_servers
+  become: true
+  tasks:
+  - name: create splunk users
+    tags: always
+    user:
+      name: splunkadmin
+      groups: root
+
+  - name: add key for splunkadmin
+    tags: always
+    authorized_key:
+      user: splunkadmin
+      key: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHZ6a4oX47ZlHhI6SESf+TYGpkokkXvvEoggCI3R450m server1"
+
+  - name: add splunkadmin to sudoers
+    tags: always
+    copy:
+      src: ~/ansible/splunk_files/sudoer_splunk
+      dest: /etc/sudoers.d/splunk
+      owner: root
+      group: root
+      mode: 0440

@@ -1,0 +1,36 @@
+---
+
+
+- hosts: all
+  become: true
+#  vars: 
+  pre_tasks:
+
+  - name: install updates
+    tags: always
+    apt: 
+      update_cache: yes
+    changed_when: false
+
+
+- hosts: splunk_servers
+  become: true
+  tasks:
+  - name: add key for splunkadmin
+    tags: always
+    authorized_key:
+      user: splunkadmin
+      key: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHZ6a4oX47ZlHhI6SESf+TYGpkokkXvvEoggCI3R450m server1"
+
+  - name: copy splunk files over
+    copy:
+      src: ~/ansible/splunk_files/splunk_enterprise_9.0.4.tgz
+      dest: /etc/splunkfiles/splunk_enterprise_9.0.4.tgz
+      owner: root
+      group: root
+      mode: 0655
+#  - name: install splunk
+#    apt:
+#      name:
+#      state: latest
+
