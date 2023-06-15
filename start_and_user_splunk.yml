@@ -1,0 +1,29 @@
+- hosts: splunk_servers
+  become: true
+  vars_prompt:
+    - name: splunkuser
+      prompt: What is the username for Splunk
+      private: false
+
+    - name: splunkpassword 
+      prompt: Password
+
+  tasks:
+  - name: configure splunk to start on boot
+    command:
+      "/opt/splunk/bin/splunk enable boot-start"
+
+  - name: create new user
+    expect:
+      command: /opt/splunk/bin/splunk add user a-mcg -role Admin -password admin123
+      responses:
+        'Splunk username:' : "{{ splunkuser }}"
+        'Password:' : "{{ splunkpassword }}"
+
+  - name: create splunk alias
+    copy:
+      src: ./splunkfiles/alias.sh
+      dest: /etc/profile.d/alias.sh
+      owner: admin2
+      group: root
+      mode: 0644

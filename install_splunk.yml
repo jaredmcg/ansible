@@ -1,9 +1,8 @@
 ---
 
 
-- hosts: all
+- hosts: splunk_servers
   become: true
-#  vars: 
   pre_tasks:
 
   - name: install updates
@@ -22,15 +21,32 @@
       user: splunkadmin
       key: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHZ6a4oX47ZlHhI6SESf+TYGpkokkXvvEoggCI3R450m server1"
 
+  - name: create splunkfiles directory
+    file:
+      path: "{{ item }}"
+      state: directory
+    loop:
+      -  /tmp/splunkfiles
+
   - name: copy splunk files over
     copy:
-      src: ~/ansible/splunk_files/splunk_enterprise_9.0.4.tgz
-      dest: /etc/splunkfiles/splunk_enterprise_9.0.4.tgz
+      src: /tmp/splunkfiles/splunk_enterprise_9.0.4.tgz
+      dest: /tmp/splunkfiles/splunk.tgz
       owner: root
       group: root
       mode: 0655
-#  - name: install splunk
-#    apt:
-#      name:
-#      state: latest
+      force: no
 
+  - name: unpack splunk
+    unarchive:
+      src: /tmp/splunkfiles/splunk.tgz
+      dest: /opt
+      remote_src: yes
+      keep_newer: no
+
+  - name: install splunk
+    shell:
+      "/opt/splunk/bin/splunk start --accept-license --answer-yes --no-prompt --seed-passwd admin123"
+
+  - name: change permissions on splunk folder
+    command: chown admin2:admin2 /opt/splunk/

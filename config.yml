@@ -1,0 +1,29 @@
+- hosts: splunk_servers
+  become: false
+  vars:
+    splunk: "/opt/splunk/bin/splunk"
+
+  tasks:
+  - name: install splunk ES and linux addon
+    #copies over the files from source directory on ansible host
+    copy:
+      src: /tmp/splunkfiles/splunk-enterprise-security_701.spl
+      dest: /tmp/splunkfiles/splunkES.spl
+    copy:
+      src: /tmp/splunkfiles/splunk_linux_addon.tgz
+      dest: /tmp/splunkfiles/linuxaddon.tgz
+
+    #installs via splunk builtin app
+    command:
+      splunk install app /tmp/splunkfiles/splunkES.spl
+    command:
+      splunk install app /tmp/splunkfiles/linuxaddon.tgz
+
+
+  - name: copy over inputs.conf file
+
+  - name: setup new index for hosts
+
+  - name: copy over application for deployment
+
+  - name: setup universal forwarder
